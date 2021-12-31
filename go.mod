@@ -1,3 +1,3 @@
-module mdtablefmt
+module github.com/backplane/mdtablefmt
 
-go 1.13
+go 1.16
