@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"log"
 	"strings"
 	"testing"
 )
@@ -59,14 +58,12 @@ const expected_output_stripped string = `                               stat |  
 Virtualization in container support |         no         |        yes
 `
 
-// TestHelloName calls greetings.Hello with a name, checking
-// for a valid return value.
 func TestPrintMarkdownTable(t *testing.T) {
 	want := expected_output_stripped
 
 	table, err := ParseMarkdownTable(strings.NewReader(input))
 	if err != nil {
-		log.Fatalf("failed to parse markdown table from test input string, error: %s", err)
+		t.Fatalf("failed to parse markdown table from test input string, error: %s", err)
 	}
 	buf := new(bytes.Buffer)
 	PrintMarkdownTable(buf, table, false)
@@ -82,7 +79,7 @@ func TestPrintMarkdownTableUnstripped(t *testing.T) {
 
 	table, err := ParseMarkdownTable(strings.NewReader(input))
 	if err != nil {
-		log.Fatalf("failed to parse markdown table from test input string, error: %s", err)
+		t.Fatalf("failed to parse markdown table from test input string, error: %s", err)
 	}
 	buf := new(bytes.Buffer)
 	PrintMarkdownTable(buf, table, true)
