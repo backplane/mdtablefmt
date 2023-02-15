@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
 )
@@ -26,6 +27,19 @@ type MarkdownTable struct {
 	Rows             [][]string
 }
 
+var noStrip bool
+
+const helpText = `usage: %s
+
+utility for formatting Markdown tables; reads valid markdown table data on the
+standard input and writes a properly spaced and padded version on the standard
+output
+
+For more information, visit the source code repository:
+https://github.com/backplane/mdtablefmt
+
+`
+
 // NewMarkdownTable is the constructor for MarkdownTable
 func NewMarkdownTable() *MarkdownTable {
 	headings := make([]string, 0)
@@ -40,8 +54,16 @@ func NewMarkdownTable() *MarkdownTable {
 	}
 }
 
-func main() {
+func init() {
+	flag.BoolVar(&noStrip, "no-strip", false, "fully pad the rightmost output column instead of stripping trailing whitespace")
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, helpText, os.Args[0])
+		flag.PrintDefaults()
+	}
 
+}
+
+func main() {
 	flag.Parse()
 
 	// Load a table from STDIN
@@ -51,5 +73,5 @@ func main() {
 	}
 
 	// Print the table back out (reformatted)
-	PrintMarkdownTable(table)
+	PrintMarkdownTable(os.Stdout, table, noStrip)
 }

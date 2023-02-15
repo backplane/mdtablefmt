@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"strings"
 )
 
@@ -32,50 +33,57 @@ func spacePad(s string, width int, alignment ColumnAlignment) string {
 }
 
 // PrintMarkdownTable prints the given MarkdownTable to STDOUT
-func PrintMarkdownTable(table *MarkdownTable) {
+func PrintMarkdownTable(out io.Writer, table *MarkdownTable, keepTrailingWhitespace bool) {
 	// short-circuit if there is nothing to print
 	if len(table.Rows) < 1 {
 		return
 	}
 
 	columnCount := len(table.Headings) - 1
+	var paddedContent string
 
 	// print the header row
 	for colNum, header := range table.Headings {
-		fmt.Print(spacePad(header, table.ColumnWidths[colNum], table.ColumnAlignments[colNum]))
+		paddedContent := spacePad(header, table.ColumnWidths[colNum], table.ColumnAlignments[colNum])
 		if colNum < columnCount {
-			fmt.Print(" | ")
-		} else {
-			fmt.Println("")
+			fmt.Fprint(out, paddedContent, " | ")
+			continue
 		}
+		if !keepTrailingWhitespace {
+			paddedContent = strings.TrimRight(paddedContent, " ")
+		}
+		fmt.Fprintln(out, paddedContent)
 	}
 
 	// print the delimiter row
 	for colNum := range table.Headings {
 		switch table.ColumnAlignments[colNum] {
 		case AlignRight:
-			fmt.Print(strings.Repeat("-", table.ColumnWidths[colNum]-1), ":")
+			fmt.Fprint(out, strings.Repeat("-", table.ColumnWidths[colNum]-1), ":")
 		case AlignCenter:
-			fmt.Print(":", strings.Repeat("-", table.ColumnWidths[colNum]-2), ":")
+			fmt.Fprint(out, ":", strings.Repeat("-", table.ColumnWidths[colNum]-2), ":")
 		default:
-			fmt.Print(strings.Repeat("-", table.ColumnWidths[colNum]))
+			fmt.Fprint(out, strings.Repeat("-", table.ColumnWidths[colNum]))
 		}
 		if colNum < columnCount {
-			fmt.Print(" | ")
+			fmt.Fprint(out, " | ")
 		} else {
-			fmt.Println("")
+			fmt.Fprintln(out, "")
 		}
 	}
 
 	// print the data rows
 	for _, row := range table.Rows {
 		for colNum, cell := range row {
-			fmt.Print(spacePad(cell, table.ColumnWidths[colNum], table.ColumnAlignments[colNum]))
+			paddedContent = spacePad(cell, table.ColumnWidths[colNum], table.ColumnAlignments[colNum])
 			if colNum < columnCount {
-				fmt.Print(" | ")
-			} else {
-				fmt.Println("")
+				fmt.Fprint(out, paddedContent, " | ")
+				continue
 			}
+			if !keepTrailingWhitespace {
+				paddedContent = strings.TrimRight(paddedContent, " ")
+			}
+			fmt.Fprintln(out, paddedContent)
 		}
 	}
 }
