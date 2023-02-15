@@ -1,8 +1,8 @@
-PLATFORMS := darwin-amd64 linux-amd64 linux-arm
+PLATFORMS := darwin-amd64 darwin-arm64 linux-amd64 linux-arm
 TARGETS := $(PLATFORMS:%=build/%/mdtablefmt)
-.PHONY: build clean lint
+.PHONY: build test clean lint
 
-build: lint $(TARGETS)
+build: lint test $(TARGETS)
 
 clean:
 	@echo '==> Cleaning'
@@ -12,9 +12,11 @@ lint: *.go
 	@echo '==> Linting'
 	go fmt
 	go vet
-	golint
 	staticcheck
 
+test: *.go
+	@echo '==> Testing'
+	go test
 
 build/%: *.go
 	@echo '==> Building $@'
